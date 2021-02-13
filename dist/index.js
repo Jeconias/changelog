@@ -421,11 +421,13 @@ function run() {
             const path = (_a = core_1.default.getInput("path")) !== null && _a !== void 0 ? _a : defaultPath;
             const matchStart = new RegExp((_b = core_1.default.getInput("matchStart")) !== null && _b !== void 0 ? _b : defaultMatchStart, "g");
             const matchEnd = new RegExp((_c = core_1.default.getInput("matchEnd")) !== null && _c !== void 0 ? _c : defaultMatchEnd, "g");
+            console.log(matchStart);
             const content = yield fs_1.default.readFileSync(`${path}README.md`, "utf-8");
             if (!content) {
                 core_1.default.debug("README.md not found or empty.");
                 return core_1.default.setOutput("changelog", "");
             }
+            console.log(content);
             const hasStartPattern = matchStart.exec(content);
             const hasEndPattern = matchEnd.exec(content);
             if (hasStartPattern && hasEndPattern) {

@@ -6,7 +6,7 @@ inputs:
     default: ""
   matchStart:
     description: "The regex to match the start of the changelog."
-    default: "(?:\#+\sChangelog)"
+    default: "(?:\\#+\\sChangelog)"
   matchEnd:
     description: "The regex to match the end of the changelog."
     default: "<!-- Version end -->"
