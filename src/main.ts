@@ -1,59 +1,62 @@
-import core from "@actions/core";
-import github from "@actions/github";
+import * as core from "@actions/core";
 import fs from "fs";
 
-const defaultMatchStart = "(?:\\#+\\sChangelog)";
-const defaultMatchEnd = "<!-- Version end -->";
-const defaultPath = "";
+const actionName = "Changelog Action";
+const defaultMatchStart = /^<!-- Version start (?:@@\s(\{\"\w+\":\s?\".*\"\})\s)?-->/gm;
+const defaultMatchEnd = /^(\s{0,})<!-- Version end -->/gm;
+const defaultPath = "./README.md";
+
+const handleDebug = (str: string) => core.debug(`[${actionName}]::${str}`);
 
 async function run(): Promise<void> {
-  const isDebug = core.isDebug();
+  const isDebug = true || core.isDebug();
 
-  const path = core.getInput("path") ?? defaultPath;
-  const matchStart = new RegExp(
-    core.getInput("matchStart") ?? defaultMatchStart,
-    "g"
-  );
-  const matchEnd = new RegExp(
-    core.getInput("matchEnd") ?? defaultMatchEnd,
-    "g"
-  );
+  const path = core.getInput("path") || defaultPath;
+  const matchStart = defaultMatchStart;
+  const matchEnd = defaultMatchEnd;
 
   if (isDebug) {
-    core.debug(
-      `Inputs -> path:${path} | matchStart:${matchStart} | matchEnd:${matchEnd}`
-    );
+    handleDebug(`path: ${path}`);
   }
 
-  const content = await fs.readFileSync(`${path}README.md`, "utf-8");
+  const content = await fs.readFileSync(path, "utf-8");
   if (!content && isDebug) {
-    core.debug("README.md not found or empty.");
+    handleDebug("README.md not found or empty.");
     return core.setOutput("changelog", "");
   }
 
   const hasStartPattern = matchStart.exec(content);
   const hasEndPattern = matchEnd.exec(content);
 
-  console.log(content);
-
   if (isDebug) {
-    core.debug(`contentStart: ${hasStartPattern}`);
-    core.debug(`contentEnd: ${hasEndPattern}`);
+    handleDebug(
+      `contentStart: ${hasStartPattern} | index: ${hasStartPattern?.index}`
+    );
+    handleDebug(
+      `contentEnd: ${hasEndPattern} | index: ${hasEndPattern?.index}`
+    );
   }
 
-  if (hasStartPattern && hasEndPattern) {
-    if (isDebug) core.debug("Changelog found.");
-    const latestVersionContent = content.slice(
-      hasStartPattern.index,
-      hasEndPattern.index
+  const latestVersionContent = content.slice(
+    hasStartPattern?.index,
+    hasEndPattern?.index
+  );
+
+  if (hasStartPattern && hasStartPattern?.length > 0 && hasStartPattern[1]) {
+    const hasDynamicOutputs = hasStartPattern[1];
+    const JSONOutputs = JSON.parse(hasDynamicOutputs);
+    Object.keys(JSONOutputs).forEach((el) =>
+      core.setOutput(el, JSONOutputs[el] || "")
     );
-    return core.setOutput("changelog", latestVersionContent);
   }
-  if (isDebug) core.debug("Changelog not found.");
-  core.setOutput("changelog", "");
+
+  if (hasStartPattern && hasEndPattern && latestVersionContent) {
+    if (isDebug) handleDebug("Changelog found.");
+    core.setOutput("changelog", latestVersionContent);
+  } else {
+    if (isDebug) handleDebug("Changelog not found.");
+    core.setOutput("changelog", "");
+  }
 }
 
-run().catch((err) => {
-  if (core?.setFailed) core.setFailed(err.message);
-  console.log(err.message);
-});
+run().catch((err) => core.setFailed(err.message));

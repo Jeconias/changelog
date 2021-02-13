@@ -396,6 +396,25 @@ exports.toCommandValue = toCommandValue;
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -409,41 +428,52 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core_1 = __importDefault(__nccwpck_require__(186));
+const core = __importStar(__nccwpck_require__(186));
 const fs_1 = __importDefault(__nccwpck_require__(747));
-const defaultMatchStart = "(?:\\#+\\sChangelog)";
-const defaultMatchEnd = "<!-- Version end -->";
-const defaultPath = "";
+const actionName = "Changelog Action";
+const defaultMatchStart = /^<!-- Version start (?:@@\s(\{\"\w+\":\s?\".*\"\})\s)?-->/gm;
+const defaultMatchEnd = /^(\s{0,})<!-- Version end -->/gm;
+const defaultPath = "./README.md";
+const handleDebug = (str) => core.debug(`[${actionName}]::${str}`);
 function run() {
-    var _a, _b, _c;
     return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const path = (_a = core_1.default.getInput("path")) !== null && _a !== void 0 ? _a : defaultPath;
-            const matchStart = new RegExp((_b = core_1.default.getInput("matchStart")) !== null && _b !== void 0 ? _b : defaultMatchStart, "g");
-            const matchEnd = new RegExp((_c = core_1.default.getInput("matchEnd")) !== null && _c !== void 0 ? _c : defaultMatchEnd, "g");
-            console.log(matchStart);
-            const content = yield fs_1.default.readFileSync(`${path}README.md`, "utf-8");
-            if (!content) {
-                core_1.default.debug("README.md not found or empty.");
-                return core_1.default.setOutput("changelog", "");
-            }
-            console.log(content);
-            const hasStartPattern = matchStart.exec(content);
-            const hasEndPattern = matchEnd.exec(content);
-            if (hasStartPattern && hasEndPattern) {
-                core_1.default.debug("Changelog found.");
-                const latestVersionContent = content.slice(hasStartPattern.index, hasEndPattern.index);
-                return core_1.default.setOutput("changelog", latestVersionContent);
-            }
-            core_1.default.debug("Changelog not found.");
-            core_1.default.setOutput("changelog", "");
+        const isDebug =  true || 0;
+        const path = core.getInput("path") || defaultPath;
+        const matchStart = defaultMatchStart;
+        const matchEnd = defaultMatchEnd;
+        if (isDebug) {
+            handleDebug(`path: ${path}`);
         }
-        catch (error) {
-            core_1.default.setFailed(error.message);
+        const content = yield fs_1.default.readFileSync(path, "utf-8");
+        if (!content && isDebug) {
+            handleDebug("README.md not found or empty.");
+            return core.setOutput("changelog", "");
+        }
+        const hasStartPattern = matchStart.exec(content);
+        const hasEndPattern = matchEnd.exec(content);
+        if (isDebug) {
+            handleDebug(`contentStart: ${hasStartPattern} | index: ${hasStartPattern === null || hasStartPattern === void 0 ? void 0 : hasStartPattern.index}`);
+            handleDebug(`contentEnd: ${hasEndPattern} | index: ${hasEndPattern === null || hasEndPattern === void 0 ? void 0 : hasEndPattern.index}`);
+        }
+        const latestVersionContent = content.slice(hasStartPattern === null || hasStartPattern === void 0 ? void 0 : hasStartPattern.index, hasEndPattern === null || hasEndPattern === void 0 ? void 0 : hasEndPattern.index);
+        if (hasStartPattern && (hasStartPattern === null || hasStartPattern === void 0 ? void 0 : hasStartPattern.length) > 0 && hasStartPattern[1]) {
+            const hasDynamicOutputs = hasStartPattern[1];
+            const JSONOutputs = JSON.parse(hasDynamicOutputs);
+            Object.keys(JSONOutputs).forEach((el) => core.setOutput(el, JSONOutputs[el] || ""));
+        }
+        if (hasStartPattern && hasEndPattern && latestVersionContent) {
+            if (isDebug)
+                handleDebug("Changelog found.");
+            core.setOutput("changelog", latestVersionContent);
+        }
+        else {
+            if (isDebug)
+                handleDebug("Changelog not found.");
+            core.setOutput("changelog", "");
         }
     });
 }
-run();
+run().catch((err) => core.setFailed(err.message));
 
 
 /***/ }),

@@ -3,13 +3,7 @@ description: "Read your README.md and copy the last information about changes fo
 inputs:
   path:
     description: "The path to read a README.md file."
-    default: ""
-  matchStart:
-    description: "The regex to match the start of the changelog."
-    default: "(?:\\#+\\sChangelog)"
-  matchEnd:
-    description: "The regex to match the end of the changelog."
-    default: "<!-- Version end -->"
+    default: "./README.md"
 outputs:
   changelog:
     description: "The changelog text found or empty string."
