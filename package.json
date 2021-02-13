@@ -1,0 +1,20 @@
+{
+  "name": "changelog",
+  "version": "1.0.0",
+  "description": "Read your README.md and copy the last information about changes for the new tag/release.",
+  "main": "src/main.ts",
+  "author": "Jeconias Santos <jeconiass2009@hotmail.com>",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "build": "ncc build --source-map --license licenses.txt"
+  },
+  "dependencies": {
+    "@actions/core": "^1.2.6",
+    "@actions/github": "^4.0.0"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.27.0",
+    "typescript": "^4.1.5"
+  }
+}
