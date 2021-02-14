@@ -14,9 +14,15 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  Release:
+  Changelog:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
+
+    outputs:
+      shouldCreateRelease: ${{ steps.changelog.outputs.shouldCreateRelease }}
+      version: ${{ steps.changelog.outputs.version }}
+      release: ${{ steps.changelog.outputs.release }}
+      changelog: ${{ steps.changelog.outputs.changelog }}
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -31,13 +37,20 @@ jobs:
       - name: Showing the last changelog
         run: echo "${{steps.changelog.outputs.changelog}}"
 
+  Release:
+    needs: Changelog
+    if: needs.Changelog.outputs.shouldCreateRelease == 'true'
+
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Create Release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.changelog.outputs.version }}
-          release_name: ${{ steps.changelog.outputs.release }}
-          body: ${{steps.changelog.outputs.changelog}}
+          tag_name: ${{ needs.Changelog.outputs.version }}
+          release_name: ${{ needs.Changelog.outputs.release }}
+          body: ${{needs.Changelog.outputs.changelog}}
           draft: false
           prerelease: false

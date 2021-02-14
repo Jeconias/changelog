@@ -9,7 +9,7 @@ const defaultPath = "./README.md";
 const handleDebug = (str: string) => core.debug(`[${actionName}]::${str}`);
 
 async function run(): Promise<void> {
-  const isDebug = true || core.isDebug();
+  const isDebug = core.isDebug();
 
   const path = core.getInput("path") || defaultPath;
   const matchStart = defaultMatchStart;

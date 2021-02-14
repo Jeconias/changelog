@@ -1,5 +1,9 @@
-name: "Changelog"
+name: "Read your README.md - Changelog"
 description: "Read your README.md and copy the last information about changes for the new tag/release."
+author: "Jeconias Santos"
+branding:
+  icon: "activity"
+  color: "blue"
 inputs:
   path:
     description: "The path to read a README.md file."

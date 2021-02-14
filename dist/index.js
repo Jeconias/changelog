@@ -437,7 +437,7 @@ const defaultPath = "./README.md";
 const handleDebug = (str) => core.debug(`[${actionName}]::${str}`);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        const isDebug =  true || 0;
+        const isDebug = core.isDebug();
         const path = core.getInput("path") || defaultPath;
         const matchStart = defaultMatchStart;
         const matchEnd = defaultMatchEnd;
