@@ -5,7 +5,7 @@ Read your README and copy the last information about changes for the new tag/rel
 ## How to use
 
 Create the README file on the repository and add the changelog structure. Your struct should seem with:
-(Ignore "\" on the example)
+(Ignore "\\" on the example)
 
 ```
 ...
@@ -41,14 +41,20 @@ steps:
     run: echo "${{steps.ID.outputs.changelog}} | ${{steps.ID.outputs.version}}"
 ```
 
+[Full example](https://github.com/Jeconias/changelog/blob/main/.github/workflows/main.yml)
+
 ## Changelog
 
-<!-- Version start @@ {"version": "v1.3", "release": "Initial", "shouldCreateRelease": "true"} -->
+<!-- Version start @@ {"version": "v1.4", "release": "Stable", "shouldCreateRelease": "true"} -->
+
+- ### v0.1.4
+
+  - Fix README.
+  <!-- Version end -->
 
 - ### v0.1.3
 
   - Fix example.
-  <!-- Version end -->
 
 - ### v0.1.2
 
